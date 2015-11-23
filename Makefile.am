@@ -20,8 +20,13 @@ SUBDIRS += linux libusb
 endif
 
 if OS_DARWIN
+if BACKEND_LIBUSB
+SUBDIRS += libusb
+else
 SUBDIRS += mac
 endif
+endif
+
 
 if OS_FREEBSD
 SUBDIRS += libusb

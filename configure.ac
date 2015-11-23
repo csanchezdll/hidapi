@@ -72,6 +72,17 @@ case $host in
 	LIBS_LIBUSB_PRIVATE+=" $libusb_LIBS"
 	CFLAGS_LIBUSB+=" $libusb_CFLAGS"
 	;;
+*-darwin8*)
+	AC_MSG_RESULT([ (Mac OS X (libusb) back-end)])
+	AC_DEFINE(OS_DARWIN, 1, [Mac implementation])
+	AC_SUBST(OS_DARWIN)
+	backend="libusb"
+	os="darwin"
+	threads="pthreads"
+	PKG_CHECK_MODULES([libusb], [libusb-1.0 >= 1.0.16], true, [hidapi_lib_error libusb-1.0])
+	LIBS_LIBUSB_PRIVATE="$libusb_LIBS"
+	CFLAGS_LIBUSB="$libusb_CFLAGS"
+	;;
 *-darwin*)
 	AC_MSG_RESULT([ (Mac OS X back-end)])
 	AC_DEFINE(OS_DARWIN, 1, [Mac implementation])
@@ -209,6 +220,7 @@ AC_SUBST([CFLAGS_TESTGUI])
 AC_SUBST([backend])
 
 # OS info for Automake
+AM_CONDITIONAL(BACKEND_LIBUSB, test "x$backend" = xlibusb)
 AM_CONDITIONAL(OS_LINUX, test "x$os" = xlinux)
 AM_CONDITIONAL(OS_DARWIN, test "x$os" = xdarwin)
 AM_CONDITIONAL(OS_FREEBSD, test "x$os" = xfreebsd)

@@ -51,7 +51,7 @@
 
 #include "hidapi.h"
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || _POSIX_BARRIERS <= 0
 
 /* Barrier implementation because Android/Bionic don't have pthread_barrier.
    This implementation came from Brent Priddy and was posted on
@@ -420,7 +420,7 @@ static wchar_t *get_usb_string(libusb_device_handle *dev, uint8_t idx)
 	if (len < 0)
 		return NULL;
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || _POSIX_VERSION < 200809L
 
 	/* Bionic does not have iconv support nor wcsdup() function, so it
 	   has to be done manually.  The following code will only work for
@@ -1114,7 +1114,15 @@ int HID_API_EXPORT hid_read_timeout(hid_device *dev, unsigned char *data, size_t
 		/* Non-blocking, but called with timeout. */
 		int res;
 		struct timespec ts;
+#if _POSIX_TIMERS > 0
 		clock_gettime(CLOCK_REALTIME, &ts);
+#else
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+		ts.tv_sec = tv.tv_sec;
+		ts.tv_nsec = tv.tv_usec * 1000;
+#endif
+
 		ts.tv_sec += milliseconds / 1000;
 		ts.tv_nsec += (milliseconds % 1000) * 1000000;
 		if (ts.tv_nsec >= 1000000000L) {
